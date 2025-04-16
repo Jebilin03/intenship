@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Intern Attendance</title>
+  <style>
+    body {
+      font-family: Arial;
+      padding: 20px;
+      background: linear-gradient(45deg, #e0c3fc, #8ec5fc);
+      background-size: 300% 300%;
+      animation: bg 8s infinite;
+    }
+    @keyframes bg {
+      0% {background-position: 0% 50%;}
+      50% {background-position: 100% 50%;}
+      100% {background-position: 0% 50%;}
+    }
+    h2 {
+      text-align: center;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      padding: 12px;
+      border: 1px solid #333;
+      text-align: center;
+    }
+    button {
+      padding: 5px 10px;
+      margin: 2px;
+      cursor: pointer;
+    }
+    #result {
+      margin-top: 20px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Daily Work Attendance - Interns</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Intern Name</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody id="attendanceTable">
+      <tr>
+        <td>Intern 1</td>
+        <td>
+          <button onclick="mark('Intern 1', 'Present')">Present</button>
+          <button onclick="mark('Intern 1', 'Absent')">Absent</button>
+        </td>
+      </tr>
+      <tr>
+        <td>Intern 2</td>
+        <td>
+          <button onclick="mark('Intern 2', 'Present')">Present</button>
+          <button onclick="mark('Intern 2', 'Absent')">Absent</button>
+        </td>
+      </tr>
+      <tr>
+        <td>Intern 3</td>
+        <td>
+          <button onclick="mark('Intern 3', 'Present')">Present</button>
+          <button onclick="mark('Intern 3', 'Absent')">Absent</button>
+        </td>
+      </tr>
+      <tr>
+        <td>Intern 4</td>
+        <td>
+          <button onclick="mark('Intern 4', 'Present')">Present</button>
+          <button onclick="mark('Intern 4', 'Absent')">Absent</button>
+        </td>
+      </tr>
+      <tr>
+        <td>Intern 5</td>
+        <td>
+          <button onclick="mark('Intern 5', 'Present')">Present</button>
+          <button onclick="mark('Intern 5', 'Absent')">Absent</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <button onclick="submitAttendance()">Submit Attendance</button>
+
+  <div id="result"></div>
+
+  <script>
+    const attendance = {};
+
+    function mark(name, status) {
+      attendance[name] = status;
+    }
+
+    function submitAttendance() {
+      let result = "<h3>Attendance Summary:</h3><ul>";
+      for (let i = 1; i <= 5; i++) {
+        let name = "Intern " + i;
+        result += <li>${name}: ${attendance[name] || "Not marked"}</li>;
+      }
+      result += "</ul>";
+      document.getElementById("result").innerHTML = result;
+    }
+  </script>
+
+</body>
+</html>
