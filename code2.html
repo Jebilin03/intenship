@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>To-Do List</title>
+  <style>
+    body { 
+      font-family: Arial; 
+      padding: 20px; 
+      background-color: #f4f7f6;
+    }
+    input, button { 
+      margin: 5px; 
+      padding: 5px; 
+    }
+    table, th, td { 
+      border: 1px solid #ccc; 
+      border-collapse: collapse; 
+      padding: 10px; 
+    }
+    .edit { 
+      background: blue; 
+      color: #fff; 
+    }
+    .delete { 
+      background: red; 
+      color: #fff; 
+    }
+    .completed { 
+      background: green; 
+      color: #fff; 
+    }
+    tr.fade { 
+      animation: fade 0.3s ease-in; 
+    }
+    @keyframes fade { 
+      from {opacity: 0;} 
+      to {opacity: 1;} 
+    }
+  </style>
+</head>
+<body>
+
+<h3>To-Do List</h3>
+<input id="task" placeholder="Task">
+<input id="date" type="date" placeholder="Date">
+<button onclick="save()">Submit</button>
+<input type="hidden" id="index" value="-1">
+
+<table>
+  <thead><tr><th>Task</th><th>Date</th><th>Status</th><th>Action</th></tr></thead>
+  <tbody id="body"></tbody>
+</table>
+
+<script>
+  let tasks = [];
+
+  function save() {
+    let task = taskInput.value.trim(), date = dateInput.value, i = +index.value;
+    if (!task || !date) return alert("Enter task and date");
+
+    if (i === -1) {
+      tasks.push({ task, date, completed: false });
+    } else {
+      tasks[i] = { task, date, completed: false };
+    }
+
+    taskInput.value = dateInput.value = "";
+    index.value = -1;
+    show();
+  }
+
+  function show() {
+    body.innerHTML = "";
+    tasks.forEach((t, i) => {
+      let status = t.completed ? "Completed" : "Pending";
+      let row = `<tr class="fade">
+        <td>${t.task}</td><td>${t.date}</td><td>${status}</td>
+        <td>
+          <button class="edit" onclick="edit(${i})">Edit</button>
+          <button class="delete" onclick="del(${i})">Delete</button>
+          <button class="completed" onclick="markCompleted(${i})">Completed</button>
+        </td></tr>`;
+      body.innerHTML += row;
+    });
+  }
+
+  function edit(i) {
+    taskInput.value = tasks[i].task;
+    dateInput.value = tasks[i].date;
+    index.value = i;
+  }
+
+  function del(i) {
+    if (confirm("Delete?")) tasks.splice(i, 1), show();
+  }
+
+  function markCompleted(i) {
+    tasks[i].completed = true;
+    show();
+  }
+
+  let taskInput = document.getElementById("task"),
+      dateInput = document.getElementById("date"),
+      index = document.getElementById("index"),
+      body = document.getElementById("body");
+
+  show();
+</script>
+
+</body>
+</html>
