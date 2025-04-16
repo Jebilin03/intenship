@@ -89,6 +89,7 @@
     </tbody>
   </table>
 
+  <button onclick="autofillPresent()">Autofill Present</button>
   <button onclick="submitAttendance()">Submit Attendance</button>
 
   <div id="result"></div>
@@ -98,6 +99,14 @@
 
     function mark(name, status) {
       attendance[name] = status;
+    }
+
+    function autofillPresent() {
+      for (let i = 1; i <= 5; i++) {
+        let name = "Intern " + i;
+        attendance[name] = "Present";
+      }
+      alert("All interns marked as Present.");
     }
 
     function submitAttendance() {
