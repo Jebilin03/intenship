@@ -1,0 +1,42 @@
+const profileData = (() => {
+  const name = (() => {
+    const h1 = document.querySelector('h1');
+    return h1?.innerText.trim() || null;
+  })();
+
+  const headline = document.querySelector('div.text-body-medium.break-words')?.innerText.trim() || null;
+
+  const location = (() => {
+    const el = Array.from(document.querySelectorAll('span')).find(span =>
+      span.innerText?.match(/Tamil Nadu|India|Chennai/i)
+    );
+    
+    if (el) {
+      const locationText = el.innerText.trim();
+      // Breaking down location into nested object (example with city, state, country)
+      if (locationText.includes('Chennai')) {
+        return {
+          city: 'Chennai',
+          state: 'Tamil Nadu',
+          country: 'India'
+        };
+      } else {
+        return {
+          city: null,
+          state: null,
+          country: null
+        };
+      }
+    }
+    return null;
+  })();
+ const connections = (() => {
+    const span = Array.from(document.querySelectorAll('span')).find(el =>
+      el.innerText?.toLowerCase().includes('connections')
+    );
+    return span?.innerText.trim() || null;
+  })();
+
+  return { name, headline, location, connections };
+})();
+
