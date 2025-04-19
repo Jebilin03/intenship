@@ -1,0 +1,36 @@
+// Utility: Click any visible filter option by label text
+function clickOption(text) {
+  const element = [...document.querySelectorAll('*')]
+    .find(el =>
+      el.textContent.trim().toLowerCase() === text.toLowerCase() &&
+      el.offsetParent !== null // visible only
+    );
+
+  if (element) {
+    element.click();
+    console.log(`✅ Selected: ${text}`);
+  } else {
+    console.warn(`❌ Not found or not clickable: ${text}`);
+  }
+}
+
+// Step 1: Open "All filters"
+document.querySelector('.search-reusables__all-filters-pill-button')?.click();
+
+// Step 2: Sequentially click each filter with slight delay between them
+setTimeout(() => clickOption('Top Match'), 2500);
+setTimeout(() => clickOption('Past Week'), 3000);
+setTimeout(() => clickOption('Video'), 3500);
+setTimeout(() => clickOption('People you follow'), 4000);
+
+// Step 3: Click "Show results"
+setTimeout(() => {
+  const btn = [...document.querySelectorAll('button')]
+    .find(b => b.textContent.trim().toLowerCase() === 'show results');
+  if (btn) {
+    btn.click();
+    console.log('✅ Clicked "Show results"');
+  } else {
+    console.warn('❌ "Show results" button not found');
+  }
+}, 5500);
