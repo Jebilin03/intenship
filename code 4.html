@@ -1,0 +1,37 @@
+function clickFilterButton(filterId) {
+  const button = document.getElementById(filterId);
+  if (button) {
+    button.click();
+    console.log(`Clicked filter button: ${filterId}`);
+  }
+}
+
+function clickFilterOption(optionText) {
+  const observer = new MutationObserver(() => {
+    const option = [...document.querySelectorAll('span')]
+      .find(el => el.textContent.trim().toLowerCase() === optionText.toLowerCase());
+    if (option) {
+      option.click();
+      console.log(`Selected option: ${optionText}`);
+      observer.disconnect();
+    }
+  });
+
+  observer.observe(document.body, { childList: true, subtree: true });
+}
+
+// Step 1: Sort by → Latest
+clickFilterButton("searchFilter_sortBy");
+clickFilterOption("Latest");
+
+// Step 2: Date posted → Past Month
+setTimeout(() => {
+  clickFilterButton("searchFilter_datePosted");
+  clickFilterOption("Past Month");
+}, 2000);
+
+// Step 3: Content type → Videos
+setTimeout(() => {
+  clickFilterButton("searchFilter_contentType");
+  clickFilterOption("Videos");
+}, 4000);
