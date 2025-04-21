@@ -1,0 +1,108 @@
+// Filter Mapping
+const filterMapping = {
+  'Top Match': { 'Sort_by': 'Top Match' },
+  'Past Week': { 'Date_posted': 'Past Week' },
+  'Videos': { 'Content_type': 'Videos' },
+  'People you follow': { 'Posted_by': 'People you follow' }
+};
+
+// Utility: Click any visible filter option by label text
+function clickOption(text) {
+  const element = [...document.querySelectorAll('*')]
+    .find(el =>
+      el.textContent.trim().toLowerCase() === text.toLowerCase() &&
+      el.offsetParent !== null // Ensures element is visible
+    );
+
+  if (element) {
+    element.click();
+    console.log(`✅ Selected: ${text}`);
+  } else {
+    console.warn(`❌ Not found or not clickable: ${text}`);
+  }
+}
+
+// Simulated delay function
+function delay(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// Key-Value Pairs (Text Filters)
+const keyValuePairs = [
+  { field: 'From member', value: 'Uday Raj Vadeghar' },
+  { field: 'From company', value: 'IEEE' },
+  { field: 'Mentioning member', value: 'Uday Raj Vadeghar' },
+  { field: 'Mentioning company', value: 'IEEE' },
+  { field: 'Author industry', value: 'IEEE' },
+  { field: 'Author company', value: 'IEEE' },
+  { field: 'Author Keywords', value: 'chat' }
+];
+
+// Step 1: Open "All filters"
+function openFilters() {
+  const filterButton = document.querySelector('.search-reusables__all-filters-pill-button');
+  if (filterButton) {
+    filterButton.click();
+    console.log("✅ Opened 'All filters'");
+  } else {
+    console.warn("❌ 'All filters' button not found");
+  }
+}
+
+// Step 2: Apply Clickable Filters First
+async function applyClickableFilters() {
+  for (const filterName of Object.keys(filterMapping)) {
+    console.log(`Applying filter: ${filterMapping[filterName]}`);
+    clickOption(filterName);
+    await delay(700);
+  }
+}
+
+// Step 3: Fill Text Fields AFTER Selecting Filters
+async function fillTextFilters() {
+  for (const filter of keyValuePairs) {
+    const { field, value } = filter;
+    const inputs = [...document.querySelectorAll('input[type="text"], input[type="search"]')];
+
+    const input = inputs.find(input => 
+      (input.placeholder && input.placeholder.toLowerCase().includes(field.toLowerCase())) ||
+      (input.closest('label') && input.closest('label').textContent.toLowerCase().includes(field.toLowerCase()))
+    );
+
+    if (input) {
+      input.focus();
+      input.value = value;
+      ['input', 'change'].forEach(evt => input.dispatchEvent(new Event(evt, { bubbles: true })));
+      console.log(`✅ Filled ${field}: ${value}`);
+    } else {
+      console.warn(`❌ Input field not found for: ${field}`);
+    }
+
+    await delay(1000); // Delay between text field interactions
+  }
+}
+
+// Step 4: Click "Show results"
+function clickShowResults() {
+  setTimeout(() => {
+    const btn = [...document.querySelectorAll('button')]
+      .find(b => b.textContent.trim().toLowerCase() === 'show results');
+    if (btn) {
+      btn.click();
+      console.log('✅ Clicked "Show results"');
+    } else {
+      console.warn('❌ "Show results" button not found');
+    }
+  }, 5000); // Wait 5 seconds before clicking "Show results"
+}
+
+// Main Execution Function
+async function run() {
+  openFilters(); // Step 1: Open filters menu
+  await delay(2000); // Wait for UI to load
+  await applyClickableFilters(); // Step 2: Click filters first
+  await fillTextFilters(); // Step 3: Fill text fields after selection
+  clickShowResults(); // Step 4: Click "Show results"
+}
+
+run(); // Execute the process
