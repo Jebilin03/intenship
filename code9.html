@@ -1,0 +1,24 @@
+#Manifest.json
+{
+    "manifest_version": 3,
+    "name": "Go to LinkedIn",
+    "version": "1.0",
+    "description": "Opens LinkedIn when you click the icon.",
+    "action": {
+      "default_icon": {
+        "128": "eagle.png"
+      }
+    },
+    "background": {
+      "service_worker": "background.js"
+    },
+    "icons": {
+      "128": "eagle.png"
+    },
+    "permissions": ["tabs"]
+  }
+  
+#Background.js
+chrome.action.onClicked.addListener((tab) => {
+    chrome.tabs.create({ url: "https://www.linkedin.com" });
+  });
