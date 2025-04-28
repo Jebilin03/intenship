@@ -1,0 +1,115 @@
+{
+    "manifest_version": 3,
+    "name": "LinkedIn Quick Tools",
+    "version": "1.1",
+    "description": "Open LinkedIn and search posts, reels, people or go to your profile.",
+    "action": {
+      "default_popup": "popup.html",
+      "default_icon": {
+        "128": "ele.png"
+      }
+    },
+    "background": {
+      "service_worker": "background.js"
+    },
+    "permissions": ["tabs"],
+    "icons": {
+      "128": "ele.png"
+    }
+  }
+  #background
+chrome.runtime.onInstalled.addListener(() => {
+    console.log("LinkedIn Quick Tools Extension installed.");
+  });
+  
+
+#popup.html
+// Open LinkedIn Home
+document.getElementById('openLinkedIn').addEventListener('click', () => {
+    chrome.tabs.create({ url: 'https://www.linkedin.com' });
+  });
+  
+  // Search Posts
+  document.getElementById('viewPosts').addEventListener('click', () => {
+    const query = document.getElementById('postInput').value.trim();
+    const url = query 
+      ? `https://www.linkedin.com/search/results/content/?keywords=${encodeURIComponent(query)}`
+      : 'https://www.linkedin.com/feed/';
+    chrome.tabs.create({ url });
+  });
+  
+  // Search Reels
+  document.getElementById('viewReels').addEventListener('click', () => {
+    const query = document.getElementById('reelInput').value.trim();
+    const url = query 
+      ? `https://www.linkedin.com/search/results/content/?keywords=${encodeURIComponent(query)}&origin=GLOBAL_SEARCH_HEADER`
+      : 'https://www.linkedin.com/feed/reels/';
+    chrome.tabs.create({ url });
+  });
+  
+  // Search People
+  document.getElementById('searchPeople').addEventListener('click', () => {
+    const query = document.getElementById('peopleInput').value.trim();
+    const url = query 
+      ? `https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(query)}`
+      : 'https://www.linkedin.com/search/results/people/';
+    chrome.tabs.create({ url });
+  });
+  
+  // My Profile
+  document.getElementById('myProfile').addEventListener('click', () => {
+    chrome.tabs.create({ url: 'https://www.linkedin.com/in/me/' });
+  });
+  #popup.js
+<!DOCTYPE html>
+<html>
+<head>
+  <title>LinkedIn Tools</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 15px;
+      width: 250px;
+    }
+    label {
+      font-weight: bold;
+      display: block;
+      margin-top: 12px;
+    }
+    input, button {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+    }
+    button {
+      background-color: #0077b5;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    button:hover {
+      background-color: #005f87;
+    }
+  </style>
+</head>
+<body>
+  <button id="openLinkedIn">🏠 Open LinkedIn Home</button>
+
+  <label for="postInput">🔍 Search Posts</label>
+  <input type="text" id="postInput" placeholder="e.g. Data Science">
+  <button id="viewPosts">Search Posts</button>
+
+  <label for="reelInput">🎞️ Search Reels</label>
+  <input type="text" id="reelInput" placeholder="e.g. Internships">
+  <button id="viewReels">Search Reels</button>
+
+  <label for="peopleInput">👥 Search People</label>
+  <input type="text" id="peopleInput" placeholder="e.g. Hirona">
+  <button id="searchPeople">Search People</button>
+
+  <button id="myProfile">🙋 My Profile</button>
+
+  <script src="popup.js"></script>
+</body>
+</html>
