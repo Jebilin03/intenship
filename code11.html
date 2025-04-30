@@ -1,0 +1,242 @@
+#Manifest.json
+{
+  "manifest_version": 3,
+  "name": "LinkedIn Filter Extension",
+  "version": "1.0",
+  "description": "Automatically applies LinkedIn search filters.",
+  "permissions": ["tabs", "storage", "scripting"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "128": "dora.png"
+    }
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://www.linkedin.com/search/results/content/*"],
+      "js": ["content.js"]
+    }
+  ]
+}
+
+
+#Popup.html
+<!DOCTYPE html>
+<html>
+<head>
+  <title>LinkedIn Filter</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 10px;
+      width: 300px;
+    }
+    h3 {
+      text-align: center;
+    }
+    label {
+      margin-top: 10px;
+      display: block;
+      font-weight: bold;
+    }
+    select, input[type="text"], button {
+      width: 100%;
+      padding: 6px;
+      margin-top: 5px;
+      margin-bottom: 10px;
+      box-sizing: border-box;
+    }
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      margin: 5px 0;
+    }
+    .checkbox-group input[type="checkbox"] {
+      margin-right: 10px;
+    }
+    button {
+      background-color: #0073b1;
+      color: white;
+      border: none;
+      padding: 10px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #005582;
+    }
+  </style>
+</head>
+<body>
+  <h3>Apply LinkedIn Filters</h3>
+
+  <label for="sortBy">Sort By:</label>
+  <select id="sortBy">
+    <option value="relevance">Top Match</option>
+    <option value="date">Latest</option>
+  </select>
+
+  <label for="datePosted">Date Posted:</label>
+  <select id="datePosted">
+    <option value="">Any Time</option>
+    <option value="past-24h">Past 24 hours</option>
+    <option value="past-week">Past week</option>
+    <option value="past-month">Past month</option>
+  </select>
+
+  <label>Content Type:</label>
+  <div class="checkbox-group"><input type="checkbox" id="videos"><label for="videos">Videos</label></div>
+  <div class="checkbox-group"><input type="checkbox" id="images"><label for="images">Images</label></div>
+  <div class="checkbox-group"><input type="checkbox" id="liveVideos"><label for="liveVideos">Live Videos</label></div>
+  <div class="checkbox-group"><input type="checkbox" id="jobPosts"><label for="jobPosts">Job Posts</label></div>
+  <div class="checkbox-group"><input type="checkbox" id="documents"><label for="documents">Documents</label></div>
+  <div class="checkbox-group"><input type="checkbox" id="collabArticles"><label for="collabArticles">Collaborative Articles</label></div>
+
+  <label for="personName">From Member:</label>
+  <input type="text" id="personName" placeholder="Enter a name">
+
+  <label for="companyName">Mentioning Company:</label>
+  <input type="text" id="companyName" placeholder="Enter company name">
+
+  <label>Posted By:</label>
+  <div class="checkbox-group"><input type="checkbox" id="firstConnections"><label for="firstConnections">1st Connections</label></div>
+  <div class="checkbox-group"><input type="checkbox" id="me"><label for="me">Me</label></div>
+  <div class="checkbox-group"><input type="checkbox" id="peopleYouFollow"><label for="peopleYouFollow">People you follow</label></div>
+
+  <button id="submitBtn">Apply Filters</button>
+
+  <script src="popup.js"></script>
+</body>
+</html>
+
+
+#popup.js
+document.getElementById("submitBtn").addEventListener("click", () => {
+  const filters = {
+    sortBy: document.getElementById("sortBy").value,
+    datePosted: document.getElementById("datePosted").value,
+    videos: document.getElementById("videos").checked,
+    images: document.getElementById("images").checked,
+    liveVideos: document.getElementById("liveVideos").checked,
+    jobPosts: document.getElementById("jobPosts").checked,
+    documents: document.getElementById("documents").checked,
+    collabArticles: document.getElementById("collabArticles").checked,
+    personName: document.getElementById("personName").value,
+    companyName: document.getElementById("companyName").value,
+    firstConnections: document.getElementById("firstConnections").checked,
+    me: document.getElementById("me").checked,
+    peopleYouFollow: document.getElementById("peopleYouFollow").checked
+  };
+
+  // Save to local storage
+  chrome.storage.local.set({ filters }, () => {
+    chrome.tabs.create({ url: "https://www.linkedin.com/search/results/content/" });
+  });
+});
+
+#background.js
+chrome.action.onClicked.addListener((tab) => {
+  chrome.tabs.create({ url: "https://www.linkedin.com/feed/" });
+});
+
+
+#content.js
+chrome.storage.local.get(["filters"], (data) => {
+  const filters = data.filters;
+  if (!filters) return;
+
+  console.log("Applying filters:", filters);
+
+  window.addEventListener("load", () => {
+    setTimeout(() => {
+      applyFilters(filters);
+    }, 3000);
+  });
+});
+
+function applyFilters(filters) {
+  // Sort By
+  if (filters.sortBy) {
+    const sortBtn = document.querySelector('button[aria-label*="Sort by"]');
+    if (sortBtn) {
+      sortBtn.click();
+      setTimeout(() => {
+        const options = [...document.querySelectorAll('span')];
+        const match = options.find(opt => opt.innerText.toLowerCase().includes(filters.sortBy));
+        if (match) match.click();
+      }, 1000);
+    }
+  }
+
+  // Date Posted
+  if (filters.datePosted) {
+    const dateBtn = document.querySelector('button[aria-label*="Date posted filter"]');
+    if (dateBtn) {
+      dateBtn.click();
+      setTimeout(() => {
+        const options = [...document.querySelectorAll('span')];
+        const match = options.find(opt => opt.innerText.toLowerCase().includes(filters.datePosted.replace("-", " ")));
+        if (match) match.click();
+      }, 1000);
+    }
+  }
+
+  // Content Types
+  const types = [
+    { id: 'videos', label: 'Videos' },
+    { id: 'images', label: 'Images' },
+    { id: 'liveVideos', label: 'Live Videos' },
+    { id: 'jobPosts', label: 'Job Posts' },
+    { id: 'documents', label: 'Documents' },
+    { id: 'collabArticles', label: 'Collaborative Articles' }
+  ];
+  types.forEach(type => {
+    if (filters[type.id]) {
+      const btn = [...document.querySelectorAll('button')].find(b => b.innerText.includes(type.label));
+      if (btn) btn.click();
+    }
+  });
+
+  // From Member
+  if (filters.personName) {
+    const input = document.querySelector('input[placeholder*="Search by member name"]');
+    if (input) {
+      input.value = filters.personName;
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+  }
+
+  // Mentioning Company
+  if (filters.companyName) {
+    const input = document.querySelector('input[placeholder*="Search by company name"]');
+    if (input) {
+      input.value = filters.companyName;
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+  }
+
+  // Posted By
+  if (filters.firstConnections || filters.me || filters.peopleYouFollow) {
+    const postByBtn = document.querySelector('button[aria-label*="Posted by filter"]');
+    if (postByBtn) {
+      postByBtn.click();
+      setTimeout(() => {
+        const spans = [...document.querySelectorAll('span')];
+        if (filters.firstConnections) {
+          const opt = spans.find(el => el.innerText.includes("1st connections"));
+          if (opt) opt.click();
+        }
+        if (filters.me) {
+          const opt = spans.find(el => el.innerText.includes("Me"));
+          if (opt) opt.click();
+        }
+        if (filters.peopleYouFollow) {
+          const opt = spans.find(el => el.innerText.includes("People you follow"));
+          if (opt) opt.click();
+        }
+      }, 1000);
+    }
+  }
+}
