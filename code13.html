@@ -1,0 +1,107 @@
+#manifest
+{
+  "manifest_version": 3,
+  "name": "LinkedIn GPT Messenger",
+  "version": "1.0",
+  "permissions": [
+    "storage",
+    "activeTab",
+    "scripting"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": "dora.png"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "icons": {
+    "128": "dora.png"
+  }
+}
+
+#background.js
+const OPENROUTER_API_KEY = "sk-or-v1-ef1...7f7"; // Your actual OpenRouter API key
+
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.action === "sendToGPT") {
+    const userMessage = request.message;
+
+    // Sending the message to OpenRouter API
+    fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${OPENROUTER_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: "openai/gpt-4o",
+        messages: [{ role: "user", content: userMessage }]
+      })
+    })
+    .then(res => res.json())
+    .then(data => {
+      const gptReply = data.choices[0].message.content;
+
+      // Save both user and GPT messages to local storage
+      chrome.storage.local.get({ chatHistory: [] }, (result) => {
+        const history = result.chatHistory;
+        history.push({ user: userMessage, gpt: gptReply });
+        chrome.storage.local.set({ chatHistory: history });
+      });
+
+      // Inject GPT response into LinkedIn's message box
+      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        if (tabs[0]) {
+          chrome.scripting.executeScript({
+            target: { tabId: tabs[0].id },
+            func: (message) => {
+              const messageBox = document.querySelector("div.msg-form__contenteditable") || 
+                                 document.querySelector("textarea[aria-label='Write a message…']");
+              if (messageBox) {
+                messageBox.innerText = message;
+                messageBox.dispatchEvent(new Event("input", { bubbles: true }));
+              } else {
+                alert("❌ Message box not found on LinkedIn!");
+              }
+            },
+            args: [gptReply]
+          });
+        }
+      });
+    })
+    .catch(err => {
+      console.error("Error with GPT API:", err);
+      alert("Error with GPT API. Check console for details.");
+    });
+  }
+});
+#popup.html
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      body { font-family: sans-serif; padding: 10px; }
+      button { padding: 6px 12px; margin-top: 10px; }
+    </style>
+  </head>
+  <body>
+    <h3>Send Message to GPT</h3>
+    <textarea id="userMessage" rows="4" cols="30" placeholder="Type your message..."></textarea>
+    <br>
+    <button id="sendButton">Send to GPT</button>
+    <script src="popup.js"></script>
+  </body>
+</html>
+
+#popup.js
+document.getElementById("sendButton").addEventListener("click", () => {
+  const message = document.getElementById("userMessage").value.trim();
+  if (!message) {
+    alert("Please type something!");
+    return;
+  }
+
+  // Send the message to background.js
+  chrome.runtime.sendMessage({ action: "sendToGPT", message });
+});
