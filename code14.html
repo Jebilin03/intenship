@@ -1,0 +1,56 @@
+{
+  "manifest_version": 3,
+  "name": "OpenRouter GPT Tester",
+  "version": "1.0",
+  "permissions": ["storage"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "128": "dora.png"
+    }
+  }
+}
+
+#popup.html
+<!DOCTYPE html>
+<html>
+<head>
+  <title>GPT Ask</title>
+  <style>
+    body { font-family: Arial; padding: 10px; width: 300px; }
+    textarea { width: 100%; height: 60px; }
+    button { margin-top: 10px; }
+    #response { margin-top: 10px; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <h3>Ask GPT</h3>
+  <textarea id="prompt" placeholder="Ask something..."></textarea>
+  <button id="send">Send</button>
+  <div id="response"></div>
+  <script src="popup.js"></script>
+</body>
+</html>
+
+#popupup.js
+document.getElementById("send").addEventListener("click", async () => {
+  const prompt = document.getElementById("prompt").value;
+  const responseBox = document.getElementById("response");
+
+  const apiKey = "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";
+
+  const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${apiKey}`
+    },
+    body: JSON.stringify({
+      model: "openai/gpt-3.5-turbo",
+      messages: [{ role: "user", content: prompt }]
+    })
+  });
+
+  const data = await res.json();
+  responseBox.textContent = data.choices?.[0]?.message?.content || "No response.";
+});
